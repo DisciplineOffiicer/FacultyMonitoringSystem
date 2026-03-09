@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>DISCIPLINE OFFICE FACULTY MONITORING SYSTEM</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+/* LOGIN SCREEN STYLE */
+#loginSection {
+    display: flex; justify-content: center; align-items: center; 
+    height: 100vh; background: #0a2a66; position: fixed; width: 100%; top: 0; left: 0; z-index: 9999;
+}
+.login-card {
+    background: white; padding: 40px; border-radius: 12px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 320px; text-align: center;
+}
+.login-card h2 { margin-bottom: 25px; color: #0a2a66; border: none; font-size: 22px; }
+.login-card input { margin-bottom: 15px; width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+
+#mainSystem { display: none; }
+
+body{ margin:0; font-family:'Segoe UI',sans-serif; background:#eef1f5; }
+.header{ background:#0a2a66; color:white; padding:15px; text-align:center; font-size:24px; font-weight: bold; }
+.container{ width:95%; margin:20px auto; }
+.card{ background:#FFD900; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin-bottom:20px; }
+h2{ color:#0a2a66; border-bottom:2px solid #0a2a66; padding-bottom:8px; margin-bottom:15px; font-size: 20px; }
+
+.form-row{ display:flex; gap:15px; margin-bottom:10px; }
+.form-group{ flex:1; display:flex; flex-direction:column; }
+label{ font-weight:bold; margin-bottom: 5px; font-size: 14px; }
+
+input, select, .dropdown-btn { 
+    padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; height: 40px; box-sizing: border-box; width: 100%; background: white; text-align: left;
+}
+
+.btn{ padding:8px 15px; border:none; border-radius:4px; cursor:pointer; margin-left:5px; color:white; font-weight:bold; font-size:13px; }
+.nav-btn{ background:navy; }
+.export-btn{ background:green; }
+.pdf-btn{ background:#b10000; }
+.print-btn{ background:#555; }
+.clear-btn{ background:red; }
+.logout-btn { background: #333; }
+
+table{ width:100%; border-collapse:collapse; background:white; font-size:13px; text-align:center; }
+thead{ background:#0a2a66; color:white; }
+th, td{ padding:10px; border:1px solid #ddd; }
+.late{ color:red; font-weight:bold; }
+.absent{ color:gray; font-weight:bold; }
+.early{ color:orange; font-weight:bold; }
+.didnot{ color:violet; font-weight:bold; }
+
+.search-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+#searchBar{ width:300px; padding:8px; border-radius:4px; border:1px solid #ccc; }
+
+.dropdown{ position:relative; width: 100%; }
+.course-menu{ 
+    display:none; position:absolute; background:white; border:1px solid #ccc; width: 100%; z-index:100; box-shadow: 0 4px 8px rgba(0,0,0,0.1); top: 100%; 
+}
+.course{ padding:8px 10px; cursor:pointer; position:relative; border-bottom: 1px solid #eee; font-weight: bold; font-size: 13px; }
+.course:hover{ background: #f0f0f0; }
+.course:hover .section-menu{ display:block; }
+
+.section-menu{ 
+    display:none; position:absolute; left:100%; bottom: 0; background:white; border:1px solid #ccc; width:250px; z-index:101; box-shadow: 2px -4px 8px rgba(0,0,0,0.1); max-height: 400px; overflow-y: auto;
+}
+.section{ padding:8px 12px; cursor:pointer; border-bottom: 1px solid #eee; font-weight: normal; color: black; background: white; font-size: 13px; text-align: left; }
+.section:hover{ background:#0a2a66 !important; color:white !important; }
+
+@media print{ .no-print{display:none;} }
+</style>
+</head>
+<body>
+
+<div id="loginSection">
+    <div class="login-card">
+        <h2>Discipline Officer Monitoring Access</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button class="btn nav-btn" style="width:100%; margin:0; height: 45px;" onclick="checkLogin()">LOGIN</button>
+        <p id="loginError" style="color:red; font-size:13px; margin-top:15px; display:none;">Invalid Credentials!</p>
+    </div>
+</div>
+
+<div id="mainSystem">
+    <div class="header">DISCIPLINE OFFICE FACULTY MONITORING SYSTEM</div>
+
+    <div class="container">
+        <div class="card no-print">
+            <h2>Faculty Record Entry</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Faculty Name</label>
+                    <div class="dropdown">
+                        <button type="button" class="dropdown-btn" id="facultyBtn" onclick="toggleFaculty()">Select Faculty</button>
+                        <div class="course-menu" id="facultyMenu">
+                            <div class="course">AH-PH
+                                <div class="section-menu"> 
+                                    <div class="section" onclick="setFaculty('MARANAN, CHRISTOPHER')">MARANAN, CHRISTOPHER</div>
+                                    <div class="section" onclick="setFaculty('MAYO, KRIZZIA MARIE')">MAYO, KRIZZIA MARIE</div>
+                                    <div class="section" onclick="setFaculty('OBRA, RHENE RYAN JOHN')">OBRA, RHENE RYAN JOHN</div>
+                                    <div class="section" onclick="setFaculty('PATRICIO, CARLO')">PATRICIO, CARLO</div>
+                                </div>
+                            </div>
+                            <div class="course">ICTE-FT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('BACHILLER, JOHN IVAN')">BACHILLER, JOHN IVAN</div>
+                                    <div class="section" onclick="setFaculty('CALATA, BRIAN')">CALATA, BRIAN</div>
+                                    <div class="section" onclick="setFaculty('ELOPRE, RYNEFEL')">ELOPRE, RYNEFEL</div>
+                                    <div class="section" onclick="setFaculty('FLORES, JIRAH KIEL')">FLORES, JIRAH KIEL</div>
+                                    <div class="section" onclick="setFaculty('HALICHIC, MHELDRED')">HALICHIC, MHELDRED</div>
+                                    <div class="section" onclick="setFaculty('IDA, RICHARD')">IDA, RICHARD</div>
+                                    <div class="section" onclick="setFaculty('NEMEDEZ, MICHAEL JERICHO')">NEMEDEZ, MICHAEL JERICHO</div>
+                                    <div class="section" onclick="setFaculty('OBALDO, MARC ANGELO')">OBALDO, MARC ANGELO</div>
+                                    <div class="section" onclick="setFaculty('SARTE, JULIO')">SARTE, JULIO</div>
+                                </div>
+                            </div>
+                            <div class="course">ICTE-PT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('BESANES, JOSE ROMEO ALJAMES')">BESANES, JOSE ROMEO ALJAMES</div>
+                                    <div class="section" onclick="setFaculty('DELICANO, JOKO')">DELICANO, JOKO</div>
+                                    <div class="section" onclick="setFaculty('DIUCO, RODELLO')">DIUCO, RODELLO</div>
+                                    <div class="section" onclick="setFaculty('ESPLENADA, RONNEL CLARK')">ESPLENADA, RONNEL CLARK</div>
+                                    <div class="section" onclick="setFaculty('MARIN, ESMERALDO')">MARIN, ESMERALDO</div>
+                                    <div class="section" onclick="setFaculty('MENDOZA, ERWIN')">MENDOZA, ERWIN</div>
+                                    <div class="section" onclick="setFaculty('NOCUM, KENNETH')">NOCUM, KENNETH</div>
+                                    <div class="section" onclick="setFaculty('RIVERA, ROMAR')">RIVERA, ROMAR</div>
+                                </div>
+                            </div>
+                            <div class="course">CAS-FT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('DELA CRUZ, MART DENZEL')">DELA CRUZ, MART DENZEL</div>
+                                    <div class="section" onclick="setFaculty('NAVARRETE, JOSEPH')">NAVARRETE, JOSEPH</div>
+                                    <div class="section" onclick="setFaculty('RECINA, ADAH SUSHMITA')">RECINA, ADAH SUSHMITA</div>
+                                    <div class="section" onclick="setFaculty('TARROJA, APRIL ROSE')">TARROJA, APRIL ROSE</div>
+                                </div>
+                            </div>
+                            <div class="course">CAS-PT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('BARTOLAY, MHARJAY')">BARTOLAY, MHARJAY</div>
+                                    <div class="section" onclick="setFaculty('DELANTAR, CANON')">DELANTAR, CANON</div>
+                                    <div class="section" onclick="setFaculty('PABLO, ALNER')">PABLO, ALNER</div>
+                                </div>
+                            </div>
+                            <div class="course">GE-FT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('BRITANICO, MARK JOSEPH')">BRITANICO, MARK JOSEPH</div>
+                                    <div class="section" onclick="setFaculty('CONWI, GENESIS')">CONWI, GENESIS</div>
+                                    <div class="section" onclick="setFaculty('FERNANDEZ, KYLE CRISTIELLE')">FERNANDEZ, KYLE CRISTIELLE</div>
+                                    <div class="section" onclick="setFaculty('FIESTADA, JAMES MIKAEL')">FIESTADA, JAMES MIKAEL</div>
+                                    <div class="section" onclick="setFaculty('GARCIA, CARLO')">GARCIA, CARLO</div>
+                                    <div class="section" onclick="setFaculty('GATCHALIAN, CYRIL')">GATCHALIAN, CYRIL</div>
+                                    <div class="section" onclick="setFaculty('HIPOLITO, JOHN STARKS')">HIPOLITO, JOHN STARKS</div>
+                                    <div class="section" onclick="setFaculty('JESUITAS, IAN JOSHUA')">JESUITAS, IAN JOSHUA</div>
+                                    <div class="section" onclick="setFaculty('LISING, VOLLIT')">LISING, VOLLIT</div>
+                                    <div class="section" onclick="setFaculty('LUZADA, EARLE REINER')">LUZADA, EARLE REINER</div>
+                                    <div class="section" onclick="setFaculty('MANCIA, AERON NIXON')">MANCIA, AERON NIXON</div>
+                                    <div class="section" onclick="setFaculty('ORDONO, VIVIAN GAY')">ORDONO, VIVIAN GAY</div>
+                                    <div class="section" onclick="setFaculty('SOLLANO, NELSON jr.')">SOLLANO, NELSON jr.</div>
+                                </div>
+                            </div>
+                            <div class="course">GE-PT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('ALUPAY, JOYCE ANN')">ALUPAY, JOYCE ANN</div>
+                                    <div class="section" onclick="setFaculty('BASMAYOR, ANTONIO MIESNER')">BASMAYOR, ANTONIO MIESNER</div>
+                                    <div class="section" onclick="setFaculty('REGIS, LEAN')">REGIS, LEAN</div>
+                                    <div class="section" onclick="setFaculty('RAGAODAO, REYJAY')">RAGAODAO, REYJAY</div>
+                                    <div class="section" onclick="setFaculty('TELEG, WILLIAM')">TELEG, WILLIAM</div>
+                                </div>
+                            </div>
+                            <div class="course">HMTM-FT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('ALCANTARA, JOIE')">ALCANTARA, JOIE</div> 
+                                    <div class="section" onclick="setFaculty('SALAZAR, SHARON')">SALAZAR, SHARON</div>
+                                    <div class="section" onclick="setFaculty('PRUDENCIO, JANELLA DANICA')">PRUDENCIO, JANELLA DANICA</div>
+                                    <div class="section" onclick="setFaculty('BALLESTA, ROXANNE')">BALLESTA, ROXANNE</div>
+                                    <div class="section" onclick="setFaculty('LEE, JEFFERSON')">LEE, JEFFERSON</div>
+                                    <div class="section" onclick="setFaculty('SABALLEGUE, SALVE')">SABALLEGUE, SALVE</div>
+                                    <div class="section" onclick="setFaculty('HERMOSILLA, PATRICIA JANELLE')">HERMOSILLA, PATRICIA JANELLE</div>
+                                    <div class="section" onclick="setFaculty('BARRAMEDA, JAQUILYN')">BARRAMEDA, JAQUILYN</div>
+                                    <div class="section" onclick="setFaculty('BERNARDO, JAZZMIN')">BERNARDO, JAZZMIN</div>
+                                </div>
+                            </div>
+                            <div class="course">BM-FT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('MACATANGAY, JESSICA')">MACATANGAY, JESSICA</div>
+                                    <div class="section" onclick="setFaculty('PESTANO, JOHN MARK')">PESTANO, JOHN MARK</div>
+                                    <div class="section" onclick="setFaculty('PLAZA, BRENT RAFAEL')">PLAZA, BRENT RAFAEL</div>
+                                    <div class="section" onclick="setFaculty('ROLLUQUI, JOHN MICHAEL')">ROLLUQUI, JOHN MICHAEL</div>
+                                </div>
+                            </div>
+                            <div class="course">HMTMBM-PT
+                                <div class="section-menu">
+                                    <div class="section" onclick="setFaculty('ABOY, KEVIN ALBERT')">ABOY, KEVIN ALBERT</div>
+                                    <div class="section" onclick="setFaculty('BAOIT, MARIA FE')">BAOIT, MARIA FE</div>
+                                    <div class="section" onclick="setFaculty('JAZMIN, JENEVA ARBIE')">JAZMIN, JENEVA ARBIE</div>
+                                    <div class="section" onclick="setFaculty('MOISES, JOSEPH BAR')">MOISES, JOSEPH BAR</div>
+                                    <div class="section" onclick="setFaculty('TORRES, MARK CHRISTIAN')">TORRES, MARK CHRISTIAN</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="name">
+                </div>
+
+                <div class="form-group">
+                    <label>Date & Time</label>
+                    <input type="datetime-local" id="datetime">
+                </div>
+
+                <div class="form-group">
+                    <label>Course/Section</label>
+                    <div class="dropdown">
+                        <button type="button" class="dropdown-btn" id="sectionBtn" onclick="toggleCourse()">Select Section</button>
+                        <div class="course-menu" id="courseMenu">
+                            <div class="course">GRADE 9 <div class="section-menu"><div class="section" onclick="setSection('G9-901')">901</div></div></div>
+                            <div class="course">ACT <div class="section-menu"><div class="section" onclick="setSection('ACT201')">201</div><div class="section" onclick="setSection('ACT401')">401</div></div></div>
+                            <div class="course">CAR <div class="section-menu"><div class="section" onclick="setSection('CAR201')">201</div><div class="section" onclick="setSection('CAR401')">401</div></div></div>
+                            <div class="course">DIGAR <div class="section-menu"><div class="section" onclick="setSection('DIGAR201')">201</div><div class="section" onclick="setSection('DIGAR401')">401</div></div></div>
+                            <div class="course">ITM <div class="section-menu"><div class="section" onclick="setSection('ITM201')">201</div><div class="section" onclick="setSection('ITM202')">202</div><div class="section" onclick="setSection('ITM401')">401</div><div class="section" onclick="setSection('ITM402')">402</div></div></div>
+                            <div class="course">ABM <div class="section-menu"><div class="section" onclick="setSection('ABM201')">201</div><div class="section" onclick="setSection('ABM202')">202</div><div class="section" onclick="setSection('ABM401')">401</div><div class="section" onclick="setSection('ABM402')">402</div></div></div>
+                            <div class="course">HUMSS <div class="section-menu"><div class="section" onclick="setSection('HUMSS201')">201</div><div class="section" onclick="setSection('HUMSS202')">202</div><div class="section" onclick="setSection('HUMSS401')">401</div><div class="section" onclick="setSection('HUMSS402')">402</div></div></div>
+                            <div class="course">STEM <div class="section-menu"><div class="section" onclick="setSection('STEM201')">201</div><div class="section" onclick="setSection('STEM202')">202</div><div class="section" onclick="setSection('STEM203')">203</div><div class="section" onclick="setSection('STEM401')">401</div><div class="section" onclick="setSection('STEM402')">402</div><div class="section" onclick="setSection('STEM403')">403</div><div class="section" onclick="setSection('STEM404')">404</div></div></div>
+                            <div class="course">BSCS <div class="section-menu"><div class="section" onclick="setSection('BSCS201')">201</div><div class="section" onclick="setSection('BSCS401')">401</div><div class="section" onclick="setSection('BSCS601')">601</div></div></div>
+                            <div class="course">BSCPE <div class="section-menu"><div class="section" onclick="setSection('BSCPE201')">201</div><div class="section" onclick="setSection('BSCPE401')">401</div><div class="section" onclick="setSection('BSCPE601')">601</div><div class="section" onclick="setSection('BSCPE801')">801</div></div></div>
+                            <div class="course">BACOMM <div class="section-menu"><div class="section" onclick="setSection('BACOMM201')">201</div><div class="section" onclick="setSection('BACOMM401')">401</div><div class="section" onclick="setSection('BACOMM601')">601</div><div class="section" onclick="setSection('BACOMM801')">801</div></div></div>
+                            <div class="course">BSCRIM <div class="section-menu"><div class="section" onclick="setSection('BSCRIM201')">201</div><div class="section" onclick="setSection('BSCRIM401')">401</div></div></div>
+                            <div class="course">BSAIS <div class="section-menu"><div class="section" onclick="setSection('BSAIS201')">201</div><div class="section" onclick="setSection('BSAIS401')">401</div><div class="section" onclick="setSection('BSAIS601')">601</div><div class="section" onclick="setSection('BSAIS801')">801</div></div></div>
+                            <div class="course">BSIT <div class="section-menu"><div class="section" onclick="setSection('BSIT201')">201</div><div class="section" onclick="setSection('BSIT202')">202</div><div class="section" onclick="setSection('BSIT203')">203</div><div class="section" onclick="setSection('BSIT401')">401</div><div class="section" onclick="setSection('BSIT402')">402</div><div class="section" onclick="setSection('BSIT403')">403</div><div class="section" onclick="setSection('BSIT404')">404</div><div class="section" onclick="setSection('BSIT601')">601</div><div class="section" onclick="setSection('BSIT602')">602</div><div class="section" onclick="setSection('BSIT603')">603</div><div class="section" onclick="setSection('BSIT801')">801</div><div class="section" onclick="setSection('BSIT802')">802</div></div></div>
+                            <div class="course">BMMA <div class="section-menu"><div class="section" onclick="setSection('BMMA201')">201</div><div class="section" onclick="setSection('BMMA202')">202</div><div class="section" onclick="setSection('BMMA203')">203</div><div class="section" onclick="setSection('BMMA401')">401</div><div class="section" onclick="setSection('BMMA402')">402</div><div class="section" onclick="setSection('BMMA403')">403</div><div class="section" onclick="setSection('BMMA404')">404</div><div class="section" onclick="setSection('BMMA601')">601</div><div class="section" onclick="setSection('BMMA602')">602</div><div class="section" onclick="setSection('BMMA603')">603</div><div class="section" onclick="setSection('BMMA801')">801</div><div class="section" onclick="setSection('BMMA802')">802</div><div class="section" onclick="setSection('BMMA803')">803</div></div></div>
+                            <div class="course">BSTM <div class="section-menu"><div class="section" onclick="setSection('BSTM201')">201</div><div class="section" onclick="setSection('BSTM202')">202</div><div class="section" onclick="setSection('BSTM203')">203</div><div class="section" onclick="setSection('BSTM204')">204</div><div class="section" onclick="setSection('BSTM401')">401</div><div class="section" onclick="setSection('BSTM402')">402</div><div class="section" onclick="setSection('BSTM403')">403</div><div class="section" onclick="setSection('BSTM601')">601</div><div class="section" onclick="setSection('BSTM602')">602</div><div class="section" onclick="setSection('BSTM603')">603</div><div class="section" onclick="setSection('BSTM801')">801</div><div class="section" onclick="setSection('BSTM802')">802</div><div class="section" onclick="setSection('BSTM803')">803</div></div></div>
+                            <div class="course">BSHM <div class="section-menu"><div class="section" onclick="setSection('BSHM201')">201</div><div class="section" onclick="setSection('BSHM202')">202</div><div class="section" onclick="setSection('BSHM203')">203</div><div class="section" onclick="setSection('BSHM204')">204</div><div class="section" onclick="setSection('BSHM105')">105</div><div class="section" onclick="setSection('BSHM401')">401</div><div class="section" onclick="setSection('BSHM402')">402</div><div class="section" onclick="setSection('BSHM403')">403</div><div class="section" onclick="setSection('BSHM404')">404</div><div class="section" onclick="setSection('BSHM601')">601</div><div class="section" onclick="setSection('BSHM602')">602</div><div class="section" onclick="setSection('BSHM603')">603</div><div class="section" onclick="setSection('BSHM801')">801</div><div class="section" onclick="setSection('BSHM802')">802</div></div></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="section">
+                </div>
+
+                <div class="form-group">
+                    <label>Room</label>
+                    <select id="room">
+                        <option>201</option><option>202</option><option>203</option><option>204</option>
+                        <option>205</option><option>206</option><option>207</option><option>208</option>
+                        <option>209</option><option>210</option><option>211</option>
+                        <option>301</option><option>302</option><option>303</option><option>304</option><option>305</option><option>306</option><option>307</option><option>308</option><option>309</option><option>310</option><option>311</option><option>401</option><option>402</option><option>403</option><option>404</option><option>405</option><option>406</option><option>407</option><option>408</option><option>409</option><option>410</option><option>411</option><option>DIGITAL PHOTOG LAB (501)</option><option>BROADCASTING (502)</option><option>COMLAB1 (101)</option><option>COMLAB2 (504)</option><option>COMLAB3 (507)</option><option>COMLAB4 (506)</option><option>COMLAB5 (505)</option><option>KITCHEN (102)</option><option>BAR (503)</option><option>SUITE (508)</option><option>PHYSICS LAB (602)</option><option>CHEMISTRY LAB (603)</option><option>GYM</option><option>MPH</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <select id="startTime">
+                        <option>7:00 AM</option><option>7:30 AM</option><option>8:00 AM</option><option>8:30 AM</option>
+                        <option>9:00 AM</option><option>9:30 AM</option><option>10:00 AM</option><option>10:30 AM</option>
+                        <option>11:00 AM</option><option>11:30 AM</option><option>12:00 PM</option><option>12:30 PM</option>
+                        <option>1:00 PM</option><option>1:30 PM</option><option>2:00 PM</option><option>2:30 PM</option>
+                        <option>3:00 PM</option><option>3:30 PM</option><option>4:00 PM</option><option>4:30 PM</option>
+                        <option>5:00 PM</option><option>5:30 PM</option><option>6:00 PM</option><option>6:30 PM</option>
+                        <option>7:00 PM</option><option>7:30 PM</option><option>8:00 PM</option><option>8:30 PM</option>
+                        <option>9:00 PM</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <select id="endTime">
+                        <option>7:30 AM</option><option>8:00 AM</option><option>8:30 AM</option><option>9:00 AM</option>
+                        <option>9:30 AM</option><option>10:00 AM</option><option>10:30 AM</option><option>11:00 AM</option>
+                        <option>11:30 AM</option><option>12:00 PM</option><option>12:30 PM</option><option>1:00 PM</option>
+                        <option>1:30 PM</option><option>2:00 PM</option><option>2:30 PM</option><option>3:00 PM</option>
+                        <option>3:30 PM</option><option>4:00 PM</option><option>4:30 PM</option><option>5:00 PM</option>
+                        <option>5:30 PM</option><option>6:00 PM</option><option>6:30 PM</option><option>7:00 PM</option>
+                        <option>7:30 PM</option><option>8:00 PM</option><option>8:30 PM</option><option>9:00 PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top: 10px;">
+                <button class="btn nav-btn" onclick="addRecord('Late','late')">Late</button>
+                <button class="btn nav-btn" onclick="addRecord('Early Dismissal','early')">Early Dismissal</button>
+                <button class="btn nav-btn" onclick="addRecord('Absent','absent')">Absent</button>
+                <button class="btn nav-btn" onclick="addRecord('Did not conduct','didnot')">Did Not Conduct</button>
+            </div>
+        </div> 
+
+        <h2>Faculty Summary</h2>
+        <table>
+            <thead><tr><th>Name</th><th>Late</th><th>Absent</th><th>Early Dismissal</th><th>Did Not Conduct</th></tr></thead>
+            <tbody id="dashboardBody"></tbody>
+        </table>
+
+        <div class="search-row no-print">
+            <input type="text" id="searchBar" placeholder="Search records...">
+            <div>
+                <button class="btn export-btn" onclick="exportExcel()">Export Excel</button>
+                <button class="btn pdf-btn" onclick="exportPDF()">Export PDF</button>
+                <button class="btn print-btn" onclick="window.print()">Print</button>
+                <button class="btn clear-btn" onclick="clearAll()">Clear All</button>
+                <button class="btn logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <table>
+            <thead><tr><th>Name</th><th>Date & Time</th><th>Section</th><th>Room</th><th>Start</th><th>End</th><th>Remarks</th><th class="no-print">Action</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// --- FIREBASE CONFIG ---
+const firebaseConfig = {
+  apiKey: "AIzaSyD1ESAYBVre5mM_TrB7gcKlmJJOOpwVHb4",
+  authDomain: "faculty-monitoring-syste-344f2.firebaseapp.com",
+  databaseURL: "https://faculty-monitoring-syste-344f2-default-rtdb.firebaseio.com",
+  projectId: "faculty-monitoring-syste-344f2",
+  storageBucket: "faculty-monitoring-syste-344f2.firebasestorage.app",
+  messagingSenderId: "116695212783",
+  appId: "1:116695212783:web:146cab66e20f9401e3711a",
+  measurementId: "G-D9VMSNNHKC"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const recordsRef = db.ref("facultyRecords");
+
+let records = [];
+
+// --- SINGLE WINDOW.ONLOAD PARA SA LAHAT ---
+window.onload = function() {
+    // 1. Refresh Proof
+    if(localStorage.getItem("isLoggedIn") === "true") {
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("mainSystem").style.display = "block";
+    }
+
+    // 2. ENTER KEY SHORTCUT
+    const loginFields = ["username", "password"];
+    loginFields.forEach(id => {
+        const input = document.getElementById(id);
+        if(input) {
+            input.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    checkLogin();
+                }
+            });
+        }
+    });
+};
+
+// --- LOGIN LOGIC ---
+function checkLogin() {
+    const user = document.getElementById("username").value;
+    const pass = document.getElementById("password").value;
+    const correctUser = "admin"; 
+    const correctPass = "sticubao26";
+
+    if(user === correctUser && pass === correctPass) {
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("mainSystem").style.display = "block";
+        localStorage.setItem("isLoggedIn", "true");
+        // Clear fields
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("loginError").style.display = "none";
+    } else {
+        document.getElementById("loginError").style.display = "block";
+    }
+}
+
+// --- LOGOUT LOGIC ---
+function logout() {
+    if(confirm("Logout from system?")) {
+        localStorage.removeItem("isLoggedIn");
+        location.reload(); 
+    }
+}
+
+// --- DATABASE SYNC ---
+recordsRef.on("value", snapshot => {
+  const data = snapshot.val();
+  records = data ? Object.keys(data).map(key => ({ ...data[key], id: key })) : [];
+  renderTable();
+  updateDashboard();
+});
+
+// --- DROPDOWN LOGIC ---
+function toggleCourse(){
+  document.getElementById("facultyMenu").style.display = "none";
+  const menu = document.getElementById("courseMenu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+function setSection(sec){
+  document.getElementById("section").value = sec;
+  document.getElementById("sectionBtn").innerText = sec;
+  document.getElementById("courseMenu").style.display = "none";
+}
+function toggleFaculty(){
+  document.getElementById("courseMenu").style.display = "none";
+  const menu = document.getElementById("facultyMenu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+function setFaculty(facName){
+  document.getElementById("name").value = facName;
+  document.getElementById("facultyBtn").innerText = facName;
+  document.getElementById("facultyMenu").style.display = "none";
+}
+
+document.addEventListener("click", function(e){
+  if(!e.target.closest('.dropdown')){
+    document.getElementById("facultyMenu").style.display = "none";
+    document.getElementById("courseMenu").style.display = "none";
+  }
+});
+
+// --- RECORD MANAGEMENT ---
+function addRecord(remark, className) {
+  const name = document.getElementById("name").value;
+  const datetime = document.getElementById("datetime").value;
+  const section = document.getElementById("section").value;
+  const room = document.getElementById("room").value;
+  const startTime = document.getElementById("startTime").value;
+  const endTime = document.getElementById("endTime").value;
+  if (!name || !datetime) { alert("Please select Faculty and Date"); return; }
+  recordsRef.push({ name, datetime, section, room, startTime, endTime, remark, className });
+}
+
+function renderTable() {
+  const table = document.getElementById("tableBody");
+  table.innerHTML = "";
+  [...records].reverse().forEach((r) => {
+    const dt = r.datetime ? new Date(r.datetime).toLocaleString('en-PH', { hour12: true }) : "N/A";
+    table.innerHTML += `<tr><td>${r.name}</td><td>${dt}</td><td>${r.section}</td><td>${r.room}</td><td>${r.startTime}</td><td>${r.endTime}</td><td class="${r.className}">${r.remark}</td><td class="no-print"><button style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;" onclick="deleteRecord('${r.id}')">Delete</button></td></tr>`;
+  });
+}
+
+function deleteRecord(id) { 
+    if(confirm("Delete this record?")) db.ref("facultyRecords/" + id).remove(); 
+}
+
+function clearAll() { 
+    if(confirm("WARNING: Clear ALL records from database?")) recordsRef.remove(); 
+}
+
+function updateDashboard() {
+  const dashBody = document.getElementById("dashboardBody");
+  dashBody.innerHTML = "";
+  const counts = {};
+  records.forEach(r => {
+    if (!counts[r.name]) counts[r.name] = { Late: 0, Absent: 0, Early: 0, DidNot: 0 };
+    if (r.remark === "Late") counts[r.name].Late++;
+    else if (r.remark === "Absent") counts[r.name].Absent++;
+    else if (r.remark === "Early Dismissal") counts[r.name].Early++;
+    else if (r.remark === "Did not conduct") counts[r.name].DidNot++;
+  });
+  for (let name in counts) {
+    dashBody.innerHTML += `<tr><td>${name}</td><td>${counts[name].Late}</td><td>${counts[name].Absent}</td><td>${counts[name].Early}</td><td>${counts[name].DidNot}</td></tr>`;
+  }
+}
+
+// --- EXPORTS ---
+function exportExcel() {
+  let csv = "Name,Date,Section,Room,Start,End,Remark\n";
+  records.forEach(r => { csv += `"${r.name}","${r.datetime}","${r.section}","${r.room}","${r.startTime}","${r.endTime}","${r.remark}"\n`; });
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "FacultyReport.csv";
+  a.click();
+}
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text("Faculty Monitoring Report", 15, 15);
+  let y = 25;
+  records.forEach(r => {
+    if (y > 280) { doc.addPage(); y = 15; }
+    doc.text(`${r.name} | ${r.remark} | ${r.startTime}-${r.endTime}`, 15, y);
+    y += 7;
+  });
+  doc.save("FacultyReport.pdf");
+}
+
+// --- SEARCH FUNCTION LOGIC ---
+document.getElementById("searchBar").addEventListener("keyup", function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#tableBody tr");
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        if (text.includes(searchTerm)) {
+            row.style.display = ""; // Ipakita ang row
+        } else {
+            row.style.display = "none"; // Itago ang row
+        }
+    });
+});
+</script>
+</body>
+</html>
