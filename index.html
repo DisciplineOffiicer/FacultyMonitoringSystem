@@ -259,7 +259,6 @@
                     <input type="hidden" id="name">
                 </div>
 
-
                 <div class="form-group">
                     <label>Date & Time</label>
                     <input type="datetime-local" id="datetime">
@@ -303,7 +302,7 @@
                 </div>
             </div>
 
-           <div class="form-row">
+            <div class="form-row">
                 <div class="form-group">
                     <label>Start Time</label>
                     <select id="startTime">
@@ -330,7 +329,6 @@
                     </select>
                 </div>
             </div>
-
 
             <div style="text-align:center; margin-top: 10px;">
                 <button class="btn nav-btn" onclick="addRecord('Late','late')">Late</button>
@@ -366,34 +364,42 @@
 <script>
 // --- FIREBASE CONFIG ---
 const firebaseConfig = {
-    apiKey: "AIzaSyD1ESAYBVre5mM_TrB7gcKlmJJOOpwVHb4",
-    authDomain: "faculty-monitoring-syste-344f2.firebaseapp.com",
-    databaseURL: "https://faculty-monitoring-syste-344f2-default-rtdb.firebaseio.com",
-    projectId: "faculty-monitoring-syste-344f2",
-    storageBucket: "faculty-monitoring-syste-344f2.firebasestorage.app",
-    messagingSenderId: "116695212783",
-    appId: "1:116695212783:web:146cab66e20f9401e3711a",
-    measurementId: "G-D9VMSNNHKC"
+  apiKey: "AIzaSyD1ESAYBVre5mM_TrB7gcKlmJJOOpwVHb4",
+  authDomain: "faculty-monitoring-syste-344f2.firebaseapp.com",
+  databaseURL: "https://faculty-monitoring-syste-344f2-default-rtdb.firebaseio.com",
+  projectId: "faculty-monitoring-syste-344f2",
+  storageBucket: "faculty-monitoring-syste-344f2.firebasestorage.app",
+  messagingSenderId: "116695212783",
+  appId: "1:116695212783:web:146cab66e20f9401e3711a",
+  measurementId: "G-D9VMSNNHKC"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const recordsRef = db.ref("facultyRecords");
+
 let records = [];
 
-// --- PAGE LOAD LOGIC ---
+// --- SINGLE WINDOW.ONLOAD PARA SA LAHAT ---
 window.onload = function() {
+    // 1. Refresh Proof
     if(localStorage.getItem("isLoggedIn") === "true") {
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("mainSystem").style.display = "block";
     }
 
-    // ENTER KEY FOR LOGIN
+    // 2. ENTER KEY SHORTCUT
     const loginFields = ["username", "password"];
     loginFields.forEach(id => {
-        document.getElementById(id).addEventListener("keypress", (e) => {
-            if(e.key === "Enter") { e.preventDefault(); checkLogin(); }
-        });
+        const input = document.getElementById(id);
+        if(input) {
+            input.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    checkLogin();
+                }
+            });
+        }
     });
 };
 
@@ -401,15 +407,23 @@ window.onload = function() {
 function checkLogin() {
     const user = document.getElementById("username").value;
     const pass = document.getElementById("password").value;
-    if(user === "admin" && pass === "sticubao26") {
+    const correctUser = "admin"; 
+    const correctPass = "sticubao26";
+
+    if(user === correctUser && pass === correctPass) {
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("mainSystem").style.display = "block";
         localStorage.setItem("isLoggedIn", "true");
+        // Clear fields
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("loginError").style.display = "none";
     } else {
         document.getElementById("loginError").style.display = "block";
     }
 }
 
+// --- LOGOUT LOGIC ---
 function logout() {
     if(confirm("Logout from system?")) {
         localStorage.removeItem("isLoggedIn");
@@ -417,109 +431,126 @@ function logout() {
     }
 }
 
-// --- SEARCH BAR LOGIC ---
-document.getElementById("searchBar").addEventListener("keyup", function() {
-    const term = this.value.toLowerCase();
-    const rows = document.querySelectorAll("#tableBody tr");
-    rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(term) ? "" : "none";
-    });
-});
-
-// --- DATA SYNC ---
+// --- DATABASE SYNC ---
 recordsRef.on("value", snapshot => {
-    const data = snapshot.val();
-    records = data ? Object.keys(data).map(key => ({ ...data[key], id: key })) : [];
-    renderTable();
-    updateDashboard();
+  const data = snapshot.val();
+  records = data ? Object.keys(data).map(key => ({ ...data[key], id: key })) : [];
+  renderTable();
+  updateDashboard();
 });
 
-// --- DROPDOWNS ---
-function toggleCourse(){ document.getElementById("facultyMenu").style.display = "none"; const menu = document.getElementById("courseMenu"); menu.style.display = menu.style.display === "block" ? "none" : "block"; }
-function setSection(sec){ document.getElementById("section").value = sec; document.getElementById("sectionBtn").innerText = sec; document.getElementById("courseMenu").style.display = "none"; }
-function toggleFaculty(){ document.getElementById("courseMenu").style.display = "none"; const menu = document.getElementById("facultyMenu"); menu.style.display = menu.style.display === "block" ? "none" : "block"; }
-function setFaculty(facName){ document.getElementById("name").value = facName; document.getElementById("facultyBtn").innerText = facName; document.getElementById("facultyMenu").style.display = "none"; }
+// --- DROPDOWN LOGIC ---
+function toggleCourse(){
+  document.getElementById("facultyMenu").style.display = "none";
+  const menu = document.getElementById("courseMenu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+function setSection(sec){
+  document.getElementById("section").value = sec;
+  document.getElementById("sectionBtn").innerText = sec;
+  document.getElementById("courseMenu").style.display = "none";
+}
+function toggleFaculty(){
+  document.getElementById("courseMenu").style.display = "none";
+  const menu = document.getElementById("facultyMenu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+function setFaculty(facName){
+  document.getElementById("name").value = facName;
+  document.getElementById("facultyBtn").innerText = facName;
+  document.getElementById("facultyMenu").style.display = "none";
+}
 
-// --- ACTIONS ---
+document.addEventListener("click", function(e){
+  if(!e.target.closest('.dropdown')){
+    document.getElementById("facultyMenu").style.display = "none";
+    document.getElementById("courseMenu").style.display = "none";
+  }
+});
+
+// --- RECORD MANAGEMENT ---
 function addRecord(remark, className) {
-    const name = document.getElementById("name").value;
-    const datetime = document.getElementById("datetime").value;
-    const section = document.getElementById("section").value;
-    const room = document.getElementById("room").value;
-    const startTime = document.getElementById("startTime").value;
-    const endTime = document.getElementById("endTime").value;
-    if (!name || !datetime) { alert("Please complete Faculty and Date/Time"); return; }
-    recordsRef.push({ name, datetime, section, room, startTime, endTime, remark, className });
+  const name = document.getElementById("name").value;
+  const datetime = document.getElementById("datetime").value;
+  const section = document.getElementById("section").value;
+  const room = document.getElementById("room").value;
+  const startTime = document.getElementById("startTime").value;
+  const endTime = document.getElementById("endTime").value;
+  if (!name || !datetime) { alert("Please select Faculty and Date"); return; }
+  recordsRef.push({ name, datetime, section, room, startTime, endTime, remark, className });
 }
 
 function renderTable() {
-    const table = document.getElementById("tableBody");
-    table.innerHTML = "";
-    [...records].reverse().forEach(r => {
-        const dt = r.datetime ? new Date(r.datetime).toLocaleString('en-PH', { hour12: true }) : "N/A";
-        table.innerHTML += `<tr><td>${r.name}</td><td>${dt}</td><td>${r.section}</td><td>${r.room}</td><td>${r.startTime}</td><td>${r.endTime}</td><td class="${r.className}">${r.remark}</td><td class="no-print"><button style="background:red; color:white; border:none; padding:5px; cursor:pointer;" onclick="deleteRecord('${r.id}')">Delete</button></td></tr>`;
-    });
+  const table = document.getElementById("tableBody");
+  table.innerHTML = "";
+  [...records].reverse().forEach((r) => {
+    const dt = r.datetime ? new Date(r.datetime).toLocaleString('en-PH', { hour12: true }) : "N/A";
+    table.innerHTML += `<tr><td>${r.name}</td><td>${dt}</td><td>${r.section}</td><td>${r.room}</td><td>${r.startTime}</td><td>${r.endTime}</td><td class="${r.className}">${r.remark}</td><td class="no-print"><button style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;" onclick="deleteRecord('${r.id}')">Delete</button></td></tr>`;
+  });
 }
 
-function deleteRecord(id) { if(confirm("Delete record?")) db.ref("facultyRecords/" + id).remove(); }
+function deleteRecord(id) { 
+    if(confirm("Delete this record?")) db.ref("facultyRecords/" + id).remove(); 
+}
+
+function clearAll() { 
+    if(confirm("WARNING: Clear ALL records from database?")) recordsRef.remove(); 
+}
 
 function updateDashboard() {
-    const dashBody = document.getElementById("dashboardBody");
-    dashBody.innerHTML = "";
-    const counts = {};
-    records.forEach(r => {
-        if (!counts[r.name]) counts[r.name] = { Late: 0, Absent: 0, Early: 0, DidNot: 0 };
-        if (r.remark === "Late") counts[r.name].Late++;
-        else if (r.remark === "Absent") counts[r.name].Absent++;
-        else if (r.remark === "Early Dismissal") counts[r.name].Early++;
-        else if (r.remark === "Did not conduct") counts[r.name].DidNot++;
-    });
-    for (let name in counts) {
-        dashBody.innerHTML += `<tr><td>${name}</td><td>${counts[name].Late}</td><td>${counts[name].Absent}</td><td>${counts[name].Early}</td><td>${counts[name].DidNot}</td></tr>`;
-    }
+  const dashBody = document.getElementById("dashboardBody");
+  dashBody.innerHTML = "";
+  const counts = {};
+  records.forEach(r => {
+    if (!counts[r.name]) counts[r.name] = { Late: 0, Absent: 0, Early: 0, DidNot: 0 };
+    if (r.remark === "Late") counts[r.name].Late++;
+    else if (r.remark === "Absent") counts[r.name].Absent++;
+    else if (r.remark === "Early Dismissal") counts[r.name].Early++;
+    else if (r.remark === "Did not conduct") counts[r.name].DidNot++;
+  });
+  for (let name in counts) {
+    dashBody.innerHTML += `<tr><td>${name}</td><td>${counts[name].Late}</td><td>${counts[name].Absent}</td><td>${counts[name].Early}</td><td>${counts[name].DidNot}</td></tr>`;
+  }
 }
 
-// --- PROFESSIONAL PDF EXPORT ---
-function exportPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.setTextColor(10, 42, 102);
-    doc.text("FACULTY MONITORING REPORT", 14, 20);
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Generated: " + new Date().toLocaleString(), 14, 28);
-
-    const tableData = [];
-    [...records].reverse().forEach(r => {
-        const dt = r.datetime ? new Date(r.datetime).toLocaleString('en-PH', { hour12: true }) : "N/A";
-        tableData.push([r.name, dt, r.section, r.room, `${r.startTime}-${r.endTime}`, r.remark]);
-    });
-
-    doc.autoTable({
-        startY: 35,
-        head: [['Faculty Name', 'Date & Time', 'Section', 'Room', 'Schedule', 'Remarks']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [10, 42, 102] },
-        styles: { fontSize: 8 },
-        columnStyles: { 0: { cellWidth: 40 }, 5: { fontStyle: 'bold' } }
-    });
-    doc.save("STI_Faculty_Report.pdf");
-}
-
+// --- EXPORTS ---
 function exportExcel() {
-    let csv = "Name,Date,Section,Room,Start,End,Remark\n";
-    records.forEach(r => { csv += `"${r.name}","${r.datetime}","${r.section}","${r.room}","${r.startTime}","${r.endTime}","${r.remark}"\n`; });
-    const blob = new Blob([csv], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "FacultyReport.csv";
-    a.click();
+  let csv = "Name,Date,Section,Room,Start,End,Remark\n";
+  records.forEach(r => { csv += `"${r.name}","${r.datetime}","${r.section}","${r.room}","${r.startTime}","${r.endTime}","${r.remark}"\n`; });
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "FacultyReport.csv";
+  a.click();
 }
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text("Faculty Monitoring Report", 15, 15);
+  let y = 25;
+  records.forEach(r => {
+    if (y > 280) { doc.addPage(); y = 15; }
+    doc.text(`${r.name} | ${r.remark} | ${r.startTime}-${r.endTime}`, 15, y);
+    y += 7;
+  });
+  doc.save("FacultyReport.pdf");
+}
+
+// --- SEARCH FUNCTION LOGIC ---
+document.getElementById("searchBar").addEventListener("keyup", function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#tableBody tr");
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        if (text.includes(searchTerm)) {
+            row.style.display = ""; // Ipakita ang row
+        } else {
+            row.style.display = "none"; // Itago ang row
+        }
+    });
+});
 </script>
 </body>
 </html>
-
-
-
