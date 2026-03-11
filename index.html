@@ -1,27 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FACULTY MONITORING SYSTEM</title>
 
+    <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
+    <!-- STYLES -->
     <style>
         /* LOGIN SCREEN */
         #loginSection {
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; background: #0a2a66; position: fixed; width: 100%; top: 0; left: 0; z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            height: 100vh; 
+            background: #0a2a66; 
+            position: fixed; 
+            width: 100%; 
+            top: 0; 
+            left: 0; 
+            z-index: 9999;
         }
         .login-card {
-            background: white; padding: 40px; border-radius: 12px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 320px; text-align: center;
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+            width: 320px; 
+            text-align: center;
         }
-        .login-card input { margin-bottom: 15px; width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .login-card input { 
+            margin-bottom: 15px; 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+        }
 
         #mainSystem { display: none; }
 
+        /* BODY AND GENERAL */
         body{ margin:0; font-family:'Segoe UI',sans-serif; background:#eef1f5; }
         .header{ background:#0a2a66; color:white; padding:15px; text-align:center; font-size:24px; font-weight: bold; }
         .container{ width:95%; margin:20px auto; }
@@ -36,12 +56,36 @@
             padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; height: 40px; box-sizing: border-box; width: 100%; background: white; text-align: left; cursor: pointer;
         }
 
-        .btn{ padding:8px 15px; border:none; border-radius:4px; cursor:pointer; margin-left:5px; color:white; font-weight:bold; font-size:13px; }
+        .btn{ 
+            padding:8px 15px; 
+            border:none; 
+            border-radius:4px; 
+            cursor:pointer; 
+            margin-left:5px; 
+            color:white; 
+            font-weight:bold; 
+            font-size:13px; 
+        }
+
+        /* BUTTON COLORS */
+        .export-btn{ background-color: #28a745; }  /* green */
+        .pdf-btn{ background-color: #dc3545; }     /* red */
+        .clear-btn{ background-color: #ffc107; color:black; }  /* yellow */
+        .logout-btn{ background-color: #6c757d; }  /* gray */
+
+        /* SEARCH BAR + BUTTON ALIGNMENT */
+        .search-row {
+            display:flex; 
+            gap:10px; 
+            margin-bottom:15px; 
+            align-items:center;
+        }
+        .search-row input { flex:1; }
+
         .nav-btn{ background:navy; }
 
-        /* --- DROPDOWN FIX --- */
+        /* DROPDOWN FIX */
         .dropdown { position: relative; width: 100%; }
-        
         .course-menu { 
             display: none; 
             position: absolute; 
@@ -57,7 +101,7 @@
         .course { 
             padding: 10px; 
             cursor: pointer; 
-            position: relative; /* Base ng alignment para sa sidebar */
+            position: relative; 
             border-bottom: 1px solid #eee; 
             font-weight: bold; 
             font-size: 13px; 
@@ -65,12 +109,11 @@
         }
         .course:hover { background: #f0f0f0; }
 
-        /* ITO YUNG NAMES NA LUMALABAS PAG NI-HOVER YUNG PROGRAM */
         .section-menu { 
             display: none; 
             position: absolute; 
             left: 100%; 
-            top: 0 !important; /* Laging pantay sa word na SHS pababa */
+            top: 0 !important; 
             background: white; 
             border: 1px solid #ccc; 
             width: 250px; 
@@ -80,7 +123,6 @@
             overflow-y: auto; 
         }
 
-        /* IBINALIK KO NA ITO: Trigger pag tinapat ang cursor */
         .course:hover > .section-menu { 
             display: block !important; 
         }
@@ -103,6 +145,9 @@
     </style>
 </head>
 <body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <div id="loginSection">
     <div class="login-card">
@@ -351,6 +396,7 @@
                 <button class="btn pdf-btn" onclick="exportPDF()">Export PDF</button>
                 <button class="btn clear-btn" onclick="clearAll()">Clear All</button>
                 <button class="btn logout-btn" onclick="logout()">Logout</button>
+
             </div>
         </div>
 
@@ -525,17 +571,43 @@ function exportExcel() {
 }
 
 function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text("Faculty Monitoring Report", 15, 15);
-  let y = 25;
-  records.forEach(r => {
-    if (y > 280) { doc.addPage(); y = 15; }
-    doc.text(`${r.name} | ${r.remark} | ${r.startTime}-${r.endTime}`, 15, y);
-    y += 7;
-  });
-  doc.save("FacultyReport.pdf");
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(16);
+    doc.setTextColor(0,0,0); // Black title
+    doc.text("Faculty Monitoring Report", 14, 20);
+
+    // Table headers
+    const headers = [["Name", "Date & Time", "Section", "Room", "Remarks", "Start", "End"]];
+
+    // Table body from records
+    const body = records.map(r => [
+        r.name, 
+        r.datetime || "", 
+        r.section || "", 
+        r.room || "", 
+        r.remark || "", 
+        r.startTime || "", 
+        r.endTime || ""
+    ]);
+
+    // Generate PDF table with black text and solid borders
+    doc.autoTable({
+        head: headers,
+        body: body,
+        startY: 30,
+        theme: 'grid',
+        headStyles: { fillColor: [10, 42, 102], textColor: 255, lineColor: 0, lineWidth: 0.1 },
+        styles: { fontSize: 10, textColor: 0, lineColor: 0, lineWidth: 0.1 },
+        alternateRowStyles: { textColor: 0 }
+    });
+
+    // Save PDF
+    doc.save("FacultyReport.pdf");
 }
+
 
 // --- SEARCH FUNCTION LOGIC ---
 document.getElementById("searchBar").addEventListener("keyup", function() {
