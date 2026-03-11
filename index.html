@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DISCIPLINE OFFICE FACULTY MONITORING SYSTEM</title>
+    <title>FACULTY MONITORING SYSTEM</title>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* LOGIN SCREEN STYLE */
+        /* LOGIN SCREEN */
         #loginSection {
             display: flex; justify-content: center; align-items: center; 
             height: 100vh; background: #0a2a66; position: fixed; width: 100%; top: 0; left: 0; z-index: 9999;
@@ -20,7 +18,6 @@
             background: white; padding: 40px; border-radius: 12px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 320px; text-align: center;
         }
-        .login-card h2 { margin-bottom: 25px; color: #0a2a66; border: none; font-size: 22px; }
         .login-card input { margin-bottom: 15px; width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
 
         #mainSystem { display: none; }
@@ -28,71 +25,99 @@
         body{ margin:0; font-family:'Segoe UI',sans-serif; background:#eef1f5; }
         .header{ background:#0a2a66; color:white; padding:15px; text-align:center; font-size:24px; font-weight: bold; }
         .container{ width:95%; margin:20px auto; }
-        .card{ background:#FFD900; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin-bottom:20px; }
+        .card{ background:#FFD900; padding:20px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin-bottom:20px; position: relative; }
         h2{ color:#0a2a66; border-bottom:2px solid #0a2a66; padding-bottom:8px; margin-bottom:15px; font-size: 20px; }
 
         .form-row{ display:flex; gap:15px; margin-bottom:10px; }
-        .form-group{ flex:1; display:flex; flex-direction:column; }
+        .form-group{ flex:1; display:flex; flex-direction:column; position: relative; }
         label{ font-weight:bold; margin-bottom: 5px; font-size: 14px; }
 
         input, select, .dropdown-btn { 
-            padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; height: 40px; box-sizing: border-box; width: 100%; background: white; text-align: left;
+            padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; height: 40px; box-sizing: border-box; width: 100%; background: white; text-align: left; cursor: pointer;
         }
 
         .btn{ padding:8px 15px; border:none; border-radius:4px; cursor:pointer; margin-left:5px; color:white; font-weight:bold; font-size:13px; }
         .nav-btn{ background:navy; }
-        .export-btn{ background:green; }
-        .pdf-btn{ background:#b10000; }
-        .print-btn{ background:#555; }
-        .clear-btn{ background:red; }
-        .logout-btn { background: #333; }
+
+        /* --- DROPDOWN FIX --- */
+        .dropdown { position: relative; width: 100%; }
+        
+        .course-menu { 
+            display: none; 
+            position: absolute; 
+            background: white; 
+            border: 1px solid #ccc; 
+            width: 100%; 
+            z-index: 5000; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+            top: 100%; 
+            left: 0;
+        }
+
+        .course { 
+            padding: 10px; 
+            cursor: pointer; 
+            position: relative; /* Base ng alignment para sa sidebar */
+            border-bottom: 1px solid #eee; 
+            font-weight: bold; 
+            font-size: 13px; 
+            color: #333;
+        }
+        .course:hover { background: #f0f0f0; }
+
+        /* ITO YUNG NAMES NA LUMALABAS PAG NI-HOVER YUNG PROGRAM */
+        .section-menu { 
+            display: none; 
+            position: absolute; 
+            left: 100%; 
+            top: 0 !important; /* Laging pantay sa word na SHS pababa */
+            background: white; 
+            border: 1px solid #ccc; 
+            width: 250px; 
+            z-index: 5001; 
+            box-shadow: 4px 0 12px rgba(0,0,0,0.1); 
+            max-height: 350px; 
+            overflow-y: auto; 
+        }
+
+        /* IBINALIK KO NA ITO: Trigger pag tinapat ang cursor */
+        .course:hover > .section-menu { 
+            display: block !important; 
+        }
+
+        .section { 
+            padding: 8px 12px; 
+            cursor: pointer; 
+            border-bottom: 1px solid #eee; 
+            font-weight: normal; 
+            color: black; 
+            text-align: left;
+        }
+        .section:hover { background: #0a2a66 !important; color: white !important; }
+
+        .show { display: block !important; }
 
         table{ width:100%; border-collapse:collapse; background:white; font-size:13px; text-align:center; margin-top: 10px; }
         thead{ background:#0a2a66; color:white; }
         th, td{ padding:10px; border:1px solid #ddd; }
-        .late{ color:red; font-weight:bold; }
-        .absent{ color:gray; font-weight:bold; }
-        .early{ color:orange; font-weight:bold; }
-        .didnot{ color:violet; font-weight:bold; }
-
-        .search-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; margin-top: 20px; }
-        #searchBar{ width:300px; padding:10px; border-radius:4px; border:1px solid #ccc; }
-
-        /* DROPDOWN SYSTEM */
-        .dropdown{ position:relative; width: 100%; }
-        .course-menu{ 
-            display:none; position:absolute; background:white; border:1px solid #ccc; width: 100%; z-index:100; box-shadow: 0 4px 8px rgba(0,0,0,0.1); top: 100%; 
-        }
-        .course{ padding:8px 10px; cursor:pointer; position:relative; border-bottom: 1px solid #eee; font-weight: bold; font-size: 13px; }
-        .course:hover{ background: #f0f0f0; }
-        .course:hover .section-menu{ display:block; }
-
-        .section-menu{ 
-            display:none; position:absolute; left:100%; bottom: 0; background:white; border:1px solid #ccc; width:250px; z-index:101; box-shadow: 2px -4px 8px rgba(0,0,0,0.1); max-height: 400px; overflow-y: auto;
-        }
-        .section{ padding:8px 12px; cursor:pointer; border-bottom: 1px solid #eee; font-weight: normal; color: black; background: white; font-size: 13px; text-align: left; }
-        .section:hover{ background:#0a2a66 !important; color:white !important; }
-
-        @media print{ .no-print{display:none;} }
     </style>
 </head>
 <body>
 
 <div id="loginSection">
     <div class="login-card">
-        <h2>DO Monitoring Access</h2>
+        <h2>DO Monitoring Login</h2>
         <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
         <button class="btn nav-btn" style="width:100%; margin:0; height: 45px;" onclick="checkLogin()">LOGIN</button>
-        <p id="loginError" style="color:red; font-size:13px; margin-top:15px; display:none;">Invalid Credentials!</p>
     </div>
 </div>
 
 <div id="mainSystem">
     <div class="header">DISCIPLINE OFFICE FACULTY MONITORING SYSTEM</div>
 
-     <div class="container">
-        <div class="card no-print">
+    <div class="container">
+        <div class="card">
             <h2>Faculty Record Entry</h2>
             <div class="form-row">
                 <div class="form-group">
@@ -100,28 +125,29 @@
                     <div class="dropdown">
                         <button type="button" class="dropdown-btn" id="facultyBtn" onclick="toggleFaculty()">Select Faculty</button>
                         <div class="course-menu" id="facultyMenu">
+                            
                             <div class="course">SHS
                                 <div class="section-menu"> 
-                                <div class="section" onclick="setFaculty('AMA, ERIC')">AMA, ERIC</div>
-                                <div class="section" onclick="setFaculty('ASUNCION, KATRINA')">ASUNCION, KATRINA</div>
-                                <div class="section" onclick="setFaculty('BAYANG, NESTOR')">BAYANG, NESTOR</div>
-                                <div class="section" onclick="setFaculty('BITCHARA, RICHARD JERIC')">BITCHARA, RICHARD JERIC</div>
-                                <div class="section" onclick="setFaculty('BRILLANTES, BRYAN JASPER')">BRILLANTES, BRYAN JASPER</div>
-                                <div class="section" onclick="setFaculty('CAGANAN, JOVEN')">CAGANAN, JOVEN</div>
-                                <div class="section" onclick="setFaculty('CALISO, JELYN')">CALISO, JELYN</div>
-                                <div class="section" onclick="setFaculty('CAMINO, CHARISA JOY')">CAMINO, CHARISA JOY</div>
-                                <div class="section" onclick="setFaculty('CARLOS, MARK ANTHONY')">CARLOS, MARK ANTHONY</div>
-                                <div class="section" onclick="setFaculty('DELA PUNTA, JANNARYNS')">DELA PUNTA, JANNARYNS</div>
-                                <div class="section" onclick="setFaculty('ESTUARIA, MICO')">ESTUARIA, MICO</div>
-                                <div class="section" onclick="setFaculty('FERNANDEZ, ROTSEN')">FERNANDEZ, ROTSEN</div>
-                                <div class="section" onclick="setFaculty('JAO, GAUDENCIO')">JAO, GAUDENCIO</div>
-                                <div class="section" onclick="setFaculty('MIGALLOS, BRYANN EARL')">MIGALLOS, BRYANN EARL</div>
-                                <div class="section" onclick="setFaculty('PALMA, CHERRY ANN')">PALMA, CHERRY ANN</div>
-                                <div class="section" onclick="setFaculty('PATRICIO, CARLO')">PATRICIO, CARLO</div>
-                                <div class="section" onclick="setFaculty('PESTAÑO, JOHN MARK')">PESTAÑO, JOHN MARK</div>
-                                <div class="section" onclick="setFaculty('REYES, JOHN REY')">REYES, JOHN REY</div>
-                                <div class="section" onclick="setFaculty('ROSAS, MARY JOYCE')">ROSAS, MARY JOYCE</div>
-                                <div class="section" onclick="setFaculty('TAPEL, JASON')">TAPEL, JASON</div>
+                                    <div class="section" onclick="setFaculty('AMA, ERIC')">AMA, ERIC</div>
+                                    <div class="section" onclick="setFaculty('ASUNCION, KATRINA')">ASUNCION, KATRINA</div>
+                                    <div class="section" onclick="setFaculty('BAYANG, NESTOR')">BAYANG, NESTOR</div>
+                                    <div class="section" onclick="setFaculty('BITCHARA, RICHARD JERIC')">BITCHARA, RICHARD JERIC</div>
+                                    <div class="section" onclick="setFaculty('BRILLANTES, BRYAN JASPER')">BRILLANTES, BRYAN JASPER</div>
+                                    <div class="section" onclick="setFaculty('CAGANAN, JOVEN')">CAGANAN, JOVEN</div>
+                                    <div class="section" onclick="setFaculty('CALISO, JELYN')">CALISO, JELYN</div>
+                                    <div class="section" onclick="setFaculty('CAMINO, CHARISA JOY')">CAMINO, CHARISA JOY</div>
+                                    <div class="section" onclick="setFaculty('CARLOS, MARK ANTHONY')">CARLOS, MARK ANTHONY</div>
+                                    <div class="section" onclick="setFaculty('DELA PUNTA, JANNARYNS')">DELA PUNTA, JANNARYNS</div>
+                                    <div class="section" onclick="setFaculty('ESTUARIA, MICO')">ESTUARIA, MICO</div>
+                                    <div class="section" onclick="setFaculty('FERNANDEZ, ROTSEN')">FERNANDEZ, ROTSEN</div>
+                                    <div class="section" onclick="setFaculty('JAO, GAUDENCIO')">JAO, GAUDENCIO</div>
+                                    <div class="section" onclick="setFaculty('MIGALLOS, BRYANN EARL')">MIGALLOS, BRYANN EARL</div>
+                                    <div class="section" onclick="setFaculty('PALMA, CHERRY ANN')">PALMA, CHERRY ANN</div>
+                                    <div class="section" onclick="setFaculty('PATRICIO, CARLO')">PATRICIO, CARLO</div>
+                                    <div class="section" onclick="setFaculty('PESTAÑO, JOHN MARK')">PESTAÑO, JOHN MARK</div>
+                                    <div class="section" onclick="setFaculty('REYES, JOHN REY')">REYES, JOHN REY</div>
+                                    <div class="section" onclick="setFaculty('ROSAS, MARY JOYCE')">ROSAS, MARY JOYCE</div>
+                                    <div class="section" onclick="setFaculty('TAPEL, JASON')">TAPEL, JASON</div>
                                 </div>
                             </div>
                             <div class="course">AH-PH
@@ -494,5 +520,6 @@ function exportExcel() {
 </script>
 </body>
 </html>
+
 
 
