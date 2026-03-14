@@ -175,32 +175,23 @@
                                 <div class="section-menu"> 
                                     <div class="section" onclick="setFaculty('AMA, ERIC')">AMA, ERIC</div>
                                     <div class="section" onclick="setFaculty('ASUNCION, KATRINA')">ASUNCION, KATRINA</div>
-                                    <div class="section" onclick="setFaculty('BALAO, MARIE FRANCE')">BALAO, MARIE FRANCE</div>
                                     <div class="section" onclick="setFaculty('BAYANG, NESTOR')">BAYANG, NESTOR</div>
                                     <div class="section" onclick="setFaculty('BITCHARA, RICHARD JERIC')">BITCHARA, RICHARD JERIC</div>
                                     <div class="section" onclick="setFaculty('BRILLANTES, BRYAN JASPER')">BRILLANTES, BRYAN JASPER</div>
                                     <div class="section" onclick="setFaculty('CAGANAN, JOVEN')">CAGANAN, JOVEN</div>
-                                    <div class="section" onclick="setFaculty('CALATA, BRIAN')">CALATA BRIAN</div>
                                     <div class="section" onclick="setFaculty('CALISO, JELYN')">CALISO, JELYN</div>
                                     <div class="section" onclick="setFaculty('CAMINO, CHARISA JOY')">CAMINO, CHARISA JOY</div>
                                     <div class="section" onclick="setFaculty('CARLOS, MARK ANTHONY')">CARLOS, MARK ANTHONY</div>
-                                    <div class="section" onclick="setFaculty('DELA CRUZ, MARK')">DELA CRUZ, MARK</div>
                                     <div class="section" onclick="setFaculty('DELA PUNTA, JANNARYNS')">DELA PUNTA, JANNARYNS</div>
                                     <div class="section" onclick="setFaculty('ESTUARIA, MICO')">ESTUARIA, MICO</div>
                                     <div class="section" onclick="setFaculty('FERNANDEZ, ROTSEN')">FERNANDEZ, ROTSEN</div>
-                                    <div class="section" onclick="setFaculty('HERMOSILLA, JANELLE')">HERMOSILLA, JANELLE</div>
-                                    <div class="section" onclick="setFaculty('IDA, RICHARD')">IDA, RICHARD</div>
                                     <div class="section" onclick="setFaculty('JAO, GAUDENCIO')">JAO, GAUDENCIO</div>
-                                    <div class="section" onclick="setFaculty('MAGLEO, ARLENE')">MAGLEO, ARLENE</div>
-                                    <div class="section" onclick="setFaculty('MARTINEZ, SHANN ANTOINE')">MARTINEZ, SHANN ANTOINE</div>
                                     <div class="section" onclick="setFaculty('MIGALLOS, BRYANN EARL')">MIGALLOS, BRYANN EARL</div>
                                     <div class="section" onclick="setFaculty('PALMA, CHERRY ANN')">PALMA, CHERRY ANN</div>
                                     <div class="section" onclick="setFaculty('PATRICIO, CARLO')">PATRICIO, CARLO</div>
                                     <div class="section" onclick="setFaculty('PESTAÑO, JOHN MARK')">PESTAÑO, JOHN MARK</div>
                                     <div class="section" onclick="setFaculty('REYES, JOHN REY')">REYES, JOHN REY</div>
                                     <div class="section" onclick="setFaculty('ROSAS, MARY JOYCE')">ROSAS, MARY JOYCE</div>
-                                    <div class="section" onclick="setFaculty('SALVE, SABALLEGUE')">SALVE, SABALLEGUE</div>
-                                    <div class="section" onclick="setFaculty('TARROJA, APRIL ROSE')">TARROJA, APRIL ROSE</div>
                                     <div class="section" onclick="setFaculty('TAPEL, JASON')">TAPEL, JASON</div>
                                 </div>
                             </div>
@@ -392,8 +383,29 @@
             </div>
         </div> 
 
-        <h2>Faculty Summary</h2>
-        <table>
+        <div class="card" style="background: #f8f9fa; border: 1px solid #0a2a66;">
+            <h2>Master Filter (Summary & Records)</h2>
+            <div class="search-row">
+                <div class="form-group">
+                    <label>From Date:</label>
+                    <input type="date" id="filterFrom">
+                </div>
+                <div class="form-group">
+                    <label>To Date:</label>
+                    <input type="date" id="filterTo">
+                </div>
+                <button class="btn nav-btn" onclick="applyMasterFilter()">Apply Filter</button>
+                <button class="btn clear-btn" onclick="resetFilter()">Show All</button>
+            </div>
+        </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+    <h2 style="margin:0;">Faculty Summary</h2>
+    <div>
+        <button class="btn export-btn" onclick="exportSummaryExcel()">Excel Summary</button>
+        <button class="btn pdf-btn" onclick="exportSummaryPDF()">PDF Summary</button>
+    </div>
+</div>        <table id="facultySummaryTable">
             <thead><tr><th>Name</th><th>Late</th><th>Absent</th><th>Early Dismissal</th><th>Did Not Conduct</th></tr></thead>
             <tbody id="dashboardBody"></tbody>
         </table>
@@ -417,16 +429,15 @@
 </div>
 
 <script>
-// --- FIREBASE CONFIG ---
+// --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
-  apiKey: "AIzaSyD1ESAYBVre5mM_TrB7gcKlmJJOOpwVHb4",
-  authDomain: "faculty-monitoring-syste-344f2.firebaseapp.com",
-  databaseURL: "https://faculty-monitoring-syste-344f2-default-rtdb.firebaseio.com",
-  projectId: "faculty-monitoring-syste-344f2",
-  storageBucket: "faculty-monitoring-syste-344f2.firebasestorage.app",
-  messagingSenderId: "116695212783",
-  appId: "1:116695212783:web:146cab66e20f9401e3711a",
-  measurementId: "G-D9VMSNNHKC"
+    apiKey: "AIzaSyD1ESAYBVre5mM_TrB7gcKlmJJOOpwVHb4",
+    authDomain: "faculty-monitoring-syste-344f2.firebaseapp.com",
+    databaseURL: "https://faculty-monitoring-syste-344f2-default-rtdb.firebaseio.com",
+    projectId: "faculty-monitoring-syste-344f2",
+    storageBucket: "faculty-monitoring-syste-344f2.firebasestorage.app",
+    messagingSenderId: "116695212783",
+    appId: "1:116695212783:web:146cab66e20f9401e3711a"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -434,205 +445,265 @@ const db = firebase.database();
 const recordsRef = db.ref("facultyRecords");
 
 let records = [];
+let filteredRecords = [];
 
-// --- SINGLE WINDOW.ONLOAD PARA SA LAHAT ---
+// --- LOGIN LOGIC ---
 window.onload = function() {
-    // 1. Refresh Proof
-    if(localStorage.getItem("isLoggedIn") === "true") {
+    if (localStorage.getItem("isLoggedIn") === "true") {
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("mainSystem").style.display = "block";
     }
-
-    // 2. ENTER KEY SHORTCUT
-    const loginFields = ["username", "password"];
-    loginFields.forEach(id => {
-        const input = document.getElementById(id);
-        if(input) {
-            input.addEventListener("keypress", function(event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    checkLogin();
-                }
-            });
-        }
-    });
 };
 
-// --- LOGIN LOGIC ---
 function checkLogin() {
     const user = document.getElementById("username").value;
     const pass = document.getElementById("password").value;
-    const correctUser = "admin"; 
-    const correctPass = "sticubao26";
-
-    if(user === correctUser && pass === correctPass) {
-        document.getElementById("loginSection").style.display = "none";
-        document.getElementById("mainSystem").style.display = "block";
+    if (user === "admin" && pass === "sticubao26") {
         localStorage.setItem("isLoggedIn", "true");
-        // Clear fields
-        document.getElementById("username").value = "";
-        document.getElementById("password").value = "";
-        document.getElementById("loginError").style.display = "none";
+        location.reload();
     } else {
-        document.getElementById("loginError").style.display = "block";
+        alert("Invalid login credentials.");
     }
 }
 
-// --- LOGOUT LOGIC ---
 function logout() {
-    if(confirm("Logout from system?")) {
+    if (confirm("Are you sure you want to logout?")) {
         localStorage.removeItem("isLoggedIn");
-        location.reload(); 
+        location.reload();
     }
 }
 
 // --- DATABASE SYNC ---
 recordsRef.on("value", snapshot => {
-  const data = snapshot.val();
-  records = data ? Object.keys(data).map(key => ({ ...data[key], id: key })) : [];
-  renderTable();
-  updateDashboard();
+    const data = snapshot.val();
+    records = data ? Object.keys(data).map(key => ({ ...data[key], id: key })) : [];
+    applyMasterFilter(); 
 });
 
-// --- DROPDOWN LOGIC ---
-function toggleCourse(){
-  document.getElementById("facultyMenu").style.display = "none";
-  const menu = document.getElementById("courseMenu");
-  menu.style.display = menu.style.display === "block" ? "none" : "block";
-}
-function setSection(sec){
-  document.getElementById("section").value = sec;
-  document.getElementById("sectionBtn").innerText = sec;
-  document.getElementById("courseMenu").style.display = "none";
-}
-function toggleFaculty(){
-  document.getElementById("courseMenu").style.display = "none";
-  const menu = document.getElementById("facultyMenu");
-  menu.style.display = menu.style.display === "block" ? "none" : "block";
-}
-function setFaculty(facName){
-  document.getElementById("name").value = facName;
-  document.getElementById("facultyBtn").innerText = facName;
-  document.getElementById("facultyMenu").style.display = "none";
+// --- DROPDOWN FUNCTIONS ---
+function toggleFaculty() { 
+    const m = document.getElementById("facultyMenu"); 
+    m.style.display = (m.style.display === "block" ? "none" : "block"); 
 }
 
-document.addEventListener("click", function(e){
-  if(!e.target.closest('.dropdown')){
-    document.getElementById("facultyMenu").style.display = "none";
-    document.getElementById("courseMenu").style.display = "none";
-  }
-});
+function setFaculty(n) { 
+    document.getElementById("name").value = n; 
+    document.getElementById("facultyBtn").innerText = n; 
+    document.getElementById("facultyMenu").style.display = "none"; 
+}
+
+function toggleCourse() { 
+    const m = document.getElementById("courseMenu"); 
+    m.style.display = (m.style.display === "block" ? "none" : "block"); 
+}
+
+function setSection(s) { 
+    document.getElementById("section").value = s; 
+    document.getElementById("sectionBtn").innerText = s; 
+    document.getElementById("courseMenu").style.display = "none"; 
+}
 
 // --- RECORD MANAGEMENT ---
 function addRecord(remark, className) {
-  const name = document.getElementById("name").value;
-  const datetime = document.getElementById("datetime").value;
-  const section = document.getElementById("section").value;
-  const room = document.getElementById("room").value;
-  const startTime = document.getElementById("startTime").value;
-  const endTime = document.getElementById("endTime").value;
-  if (!name || !datetime) { alert("Please select Faculty and Date"); return; }
-  recordsRef.push({ name, datetime, section, room, startTime, endTime, remark, className });
+    const name = document.getElementById("name").value;
+    const datetime = document.getElementById("datetime").value;
+    const section = document.getElementById("section").value;
+    const room = document.getElementById("room").value;
+    const startTime = document.getElementById("startTime").value;
+    const endTime = document.getElementById("endTime").value;
+
+    if (!name || !datetime) { alert("Please select Faculty and Date."); return; }
+
+    recordsRef.push({ name, datetime, section, room, startTime, endTime, remark, className });
+    alert("Record added successfully!");
 }
 
-function renderTable() {
-  const table = document.getElementById("tableBody");
-  table.innerHTML = "";
-  [...records].reverse().forEach((r) => {
-    const dt = r.datetime ? new Date(r.datetime).toLocaleString('en-PH', { hour12: true }) : "N/A";
-    table.innerHTML += `<tr><td>${r.name}</td><td>${dt}</td><td>${r.section}</td><td>${r.room}</td><td>${r.startTime}</td><td>${r.endTime}</td><td class="${r.className}">${r.remark}</td><td class="no-print"><button style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;" onclick="deleteRecord('${r.id}')">Delete</button></td></tr>`;
-  });
+function deleteRecord(id) { if (confirm("Delete this record?")) db.ref("facultyRecords/" + id).remove(); }
+function clearAll() { if (confirm("WARNING: This will delete ALL data. Proceed?")) recordsRef.remove(); }
+
+// --- MASTER FILTER & RENDER ---
+function applyMasterFilter() {
+    const from = document.getElementById("filterFrom").value;
+    const to = document.getElementById("filterTo").value;
+
+    if (!from || !to) {
+        filteredRecords = [...records];
+    } else {
+        const start = new Date(from); start.setHours(0,0,0,0);
+        const end = new Date(to); end.setHours(23,59,59,999);
+        filteredRecords = records.filter(r => {
+            const d = new Date(r.datetime);
+            return d >= start && d <= end;
+        });
+    }
+    renderAllTables();
 }
 
-function deleteRecord(id) { 
-    if(confirm("Delete this record?")) db.ref("facultyRecords/" + id).remove(); 
+function resetFilter() {
+    document.getElementById("filterFrom").value = "";
+    document.getElementById("filterTo").value = "";
+    applyMasterFilter();
 }
 
-function clearAll() { 
-    if(confirm("WARNING: Clear ALL records from database?")) recordsRef.remove(); 
+function renderAllTables() {
+    // 1. Records Table
+    const table = document.getElementById("tableBody");
+    table.innerHTML = "";
+    [...filteredRecords].reverse().forEach(r => {
+        const dt = r.datetime ? new Date(r.datetime).toLocaleString('en-PH', { hour12: true }) : "N/A";
+        table.innerHTML += `<tr><td>${r.name}</td><td>${dt}</td><td>${r.section}</td><td>${r.room}</td><td>${r.startTime}</td><td>${r.endTime}</td><td class="${r.className}">${r.remark}</td><td class="no-print"><button style="background:red; color:white; border:none; padding:2px 5px; cursor:pointer;" onclick="deleteRecord('${r.id}')">Delete</button></td></tr>`;
+    });
+
+    // 2. Summary Table
+    const dashBody = document.getElementById("dashboardBody");
+    dashBody.innerHTML = "";
+    const counts = {};
+    filteredRecords.forEach(r => {
+        if (!counts[r.name]) counts[r.name] = { Late: 0, Absent: 0, Early: 0, DidNot: 0 };
+        if (r.remark === "Late") counts[r.name].Late++;
+        else if (r.remark === "Absent") counts[r.name].Absent++;
+        else if (r.remark === "Early Dismissal") counts[r.name].Early++;
+        else if (r.remark === "Did not conduct") counts[r.name].DidNot++;
+    });
+    for (let name in counts) {
+        dashBody.innerHTML += `<tr><td>${name}</td><td>${counts[name].Late}</td><td>${counts[name].Absent}</td><td>${counts[name].Early}</td><td>${counts[name].DidNot}</td></tr>`;
+    }
 }
 
-function updateDashboard() {
-  const dashBody = document.getElementById("dashboardBody");
-  dashBody.innerHTML = "";
-  const counts = {};
-  records.forEach(r => {
-    if (!counts[r.name]) counts[r.name] = { Late: 0, Absent: 0, Early: 0, DidNot: 0 };
-    if (r.remark === "Late") counts[r.name].Late++;
-    else if (r.remark === "Absent") counts[r.name].Absent++;
-    else if (r.remark === "Early Dismissal") counts[r.name].Early++;
-    else if (r.remark === "Did not conduct") counts[r.name].DidNot++;
-  });
-  for (let name in counts) {
-    dashBody.innerHTML += `<tr><td>${name}</td><td>${counts[name].Late}</td><td>${counts[name].Absent}</td><td>${counts[name].Early}</td><td>${counts[name].DidNot}</td></tr>`;
-  }
+// --- EXPORT FUNCTIONS ---
+function exportSummaryExcel() {
+    let table = document.getElementById("facultySummaryTable");
+    let wb = XLSX.utils.table_to_book(table, { sheet: "Summary" });
+    XLSX.writeFile(wb, "Faculty_Summary_Report.xlsx");
 }
 
-// --- EXPORTS ---
+function exportSummaryPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Faculty Summary Report", 14, 20);
+    doc.autoTable({
+        html: '#facultySummaryTable',
+        startY: 30,
+        theme: 'grid',
+        headStyles: { fillColor: [10, 42, 102], textColor: 255 }
+    });
+    doc.save("Faculty_Summary.pdf");
+}
+function exportSummaryPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0); // Gawing black ang title
+    doc.text("Faculty Summary Report", 14, 20);
+
+    doc.autoTable({
+        html: '#facultySummaryTable',
+        startY: 30,
+        theme: 'grid',
+        headStyles: { 
+            fillColor: [10, 42, 102], 
+            textColor: 255, 
+            lineColor: [0, 0, 0], 
+            lineWidth: 0.1 
+        },
+        styles: { 
+            fontSize: 10, 
+            textColor: [0, 0, 0], // Solid Black na font sa loob ng table
+            lineColor: [0, 0, 0], // Solid Black na border lines
+            lineWidth: 0.1 
+        },
+        alternateRowStyles: { 
+            fillColor: [255, 255, 255] // Tinanggal ang grey rows para mas malinis
+        }
+    });
+    doc.save("Faculty_Summary.pdf");
+}
+
 function exportExcel() {
-  let csv = "Name,Date,Section,Room,Start,End,Remark\n";
-  records.forEach(r => { csv += `"${r.name}","${r.datetime}","${r.section}","${r.room}","${r.startTime}","${r.endTime}","${r.remark}"\n`; });
-  const blob = new Blob([csv], { type: "text/csv" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "FacultyReport.csv";
-  a.click();
+    let csv = "Name,Date,Section,Room,Start,End,Remark\n";
+    filteredRecords.forEach(r => { 
+        csv += `"${r.name}","${r.datetime}","${r.section}","${r.room}","${r.startTime}","${r.endTime}","${r.remark}"\n`; 
+    });
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Detailed_Records.csv";
+    a.click();
 }
 
 function exportPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
-    // Title
     doc.setFontSize(16);
-    doc.setTextColor(0,0,0); // Black title
-    doc.text("Faculty Monitoring Report", 14, 20);
-
-    // Table headers
-    const headers = [["Name", "Date & Time", "Section", "Room", "Remarks", "Start", "End"]];
-
-    // Table body from records
-    const body = records.map(r => [
-        r.name, 
-        r.datetime || "", 
-        r.section || "", 
-        r.room || "", 
-        r.remark || "", 
-        r.startTime || "", 
-        r.endTime || ""
-    ]);
-
-    // Generate PDF table with black text and solid borders
+    doc.text("Faculty Detailed Records", 14, 20);
+    const body = filteredRecords.map(r => [r.name, r.datetime, r.section, r.room, r.remark]);
     doc.autoTable({
-        head: headers,
+        head: [['Name', 'Date', 'Section', 'Room', 'Remark']],
         body: body,
         startY: 30,
         theme: 'grid',
-        headStyles: { fillColor: [10, 42, 102], textColor: 255, lineColor: 0, lineWidth: 0.1 },
-        styles: { fontSize: 10, textColor: 0, lineColor: 0, lineWidth: 0.1 },
-        alternateRowStyles: { textColor: 0 }
+        headStyles: { fillColor: [10, 42, 102] }
     });
-
-    // Save PDF
-    doc.save("FacultyReport.pdf");
+    doc.save("Detailed_Records.pdf");
 }
+function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0); // Black title
+    doc.text("Faculty Detailed Records", 14, 20);
 
+    const body = filteredRecords.map(r => [r.name, r.datetime, r.section, r.room, r.remark]);
 
-// --- SEARCH FUNCTION LOGIC ---
-document.getElementById("searchBar").addEventListener("keyup", function() {
-    const searchTerm = this.value.toLowerCase();
-    const rows = document.querySelectorAll("#tableBody tr");
-
-    rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        if (text.includes(searchTerm)) {
-            row.style.display = ""; // Ipakita ang row
-        } else {
-            row.style.display = "none"; // Itago ang row
+    doc.autoTable({
+        head: [['Name', 'Date', 'Section', 'Room', 'Remark']],
+        body: body,
+        startY: 30,
+        theme: 'grid',
+        headStyles: { 
+            fillColor: [10, 42, 102], 
+            textColor: 255, 
+            lineColor: [0, 0, 0], 
+            lineWidth: 0.1 
+        },
+        styles: { 
+            fontSize: 10, 
+            textColor: [0, 0, 0], // Solid Black font
+            lineColor: [0, 0, 0], // Solid Black border lines
+            lineWidth: 0.1 
+        },
+        alternateRowStyles: { 
+            fillColor: [255, 255, 255] 
         }
     });
+    doc.save("Detailed_Records.pdf");
+}
+
+// --- SEARCH BAR ---
+document.getElementById("searchBar").addEventListener("keyup", function() {
+    let val = this.value.toLowerCase();
+    document.querySelectorAll("#tableBody tr").forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
+    });
+});
+
+// --- LOGIN ENTER KEY LISTENER ---
+document.getElementById("password").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        checkLogin();
+    }
+});
+
+document.getElementById("username").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        checkLogin();
+    }
 });
 </script>
 </body>
 </html>
-
