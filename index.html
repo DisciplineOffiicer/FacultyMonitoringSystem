@@ -375,16 +375,20 @@
                 </div>
             </div>
 
-            <div style="text-align:center; margin-top: 10px;">
+           <div style="text-align:center; margin-top: 10px;">
                 <button class="btn nav-btn" onclick="addRecord('Late','late')">Late</button>
                 <button class="btn nav-btn" onclick="addRecord('Early Dismissal','early')">Early Dismissal</button>
                 <button class="btn nav-btn" onclick="addRecord('Absent','absent')">Absent</button>
                 <button class="btn nav-btn" onclick="addRecord('Did not conduct','didnot')">Did Not Conduct</button>
             </div>
-        </div> 
+
+            <div style="text-align: right; margin-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px;">
+                <button class="btn logout-btn" style="background: #dc3545; padding: 5px 12px; font-size: 12px;" onclick="logout()">Logout</button>
+            </div>
+        </div>
 
         <div class="card" style="background: #f8f9fa; border: 1px solid #0a2a66;">
-            <h2>Master Filter (Summary & Records)</h2>
+            <h2>Date Filter</h2>
             <div class="search-row">
                 <div class="form-group">
                     <label>From Date:</label>
@@ -402,22 +406,20 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
     <h2 style="margin:0;">Faculty Summary</h2>
     <div>
-        <button class="btn export-btn" onclick="exportSummaryExcel()">Excel Summary</button>
-        <button class="btn pdf-btn" onclick="exportSummaryPDF()">PDF Summary</button>
+        <button class="btn export-btn" onclick="exportSummaryExcel()">Excel Faculty Summary</button>
+        <button class="btn pdf-btn" onclick="exportSummaryPDF()">PDF Faculty Summary</button>
     </div>
 </div>        <table id="facultySummaryTable">
             <thead><tr><th>Name</th><th>Late</th><th>Absent</th><th>Early Dismissal</th><th>Did Not Conduct</th></tr></thead>
             <tbody id="dashboardBody"></tbody>
         </table>
 
-        <div class="search-row no-print">
+       <div class="search-row no-print">
             <input type="text" id="searchBar" placeholder="Search records...">
             <div>
                 <button class="btn export-btn" onclick="exportExcel()">Export Excel</button>
                 <button class="btn pdf-btn" onclick="exportPDF()">Export PDF</button>
-                <button class="btn clear-btn" onclick="clearAll()">Clear All</button>
-                <button class="btn logout-btn" onclick="logout()">Logout</button>
-
+                <button class="btn clear-btn" style="background: #6c757d; color: white;" onclick="clearAll()">Clear All</button>
             </div>
         </div>
 
@@ -514,8 +516,75 @@ function addRecord(remark, className) {
 
     if (!name || !datetime) { alert("Please select Faculty and Date."); return; }
 
-    recordsRef.push({ name, datetime, section, room, startTime, endTime, remark, className });
-    alert("Record added successfully!");
+    recordsRef.push({ name, datetime, section, room, startTime, endTime, remark, className })
+    .then(() => {
+        // Papalitan ang alert() ng temporary status message
+        showStatus("Record added successfully!");
+    })
+    .catch((error) => {
+        showStatus("Error: Hindi naisave.");
+        console.error(error);
+    });
+}
+
+// Magdagdag ng function para sa auto-hide na message
+function addRecord(remark, className) {
+    const name = document.getElementById("name").value;
+    const datetime = document.getElementById("datetime").value;
+    const section = document.getElementById("section").value;
+    const room = document.getElementById("room").value;
+    const startTime = document.getElementById("startTime").value;
+    const endTime = document.getElementById("endTime").value;
+
+    if (!name || !datetime) { 
+        alert("Please select Faculty and Date."); 
+        return; 
+    }
+
+    recordsRef.push({ 
+        name, 
+        datetime, 
+        section, 
+        room, 
+        startTime, 
+        endTime, 
+        remark, 
+        className 
+    })
+    .then(() => {
+        // Notification sa gitna
+        showStatus("Record added successfully!");
+    })
+    .catch((error) => {
+        showStatus("Error: Hindi naisave.");
+        console.error(error);
+    });
+}
+
+// Function para sa notification na nasa gitna at kusa nawawala
+function showStatus(message) {
+    const statusDiv = document.createElement("div");
+    statusDiv.innerText = message;
+    
+    // CSS para sa Center Top placement
+    statusDiv.style.position = "fixed";
+    statusDiv.style.top = "20px"; // Konting distansya mula sa pinakataas
+    statusDiv.style.left = "50%";
+    statusDiv.style.transform = "translateX(-50%)"; // Center horizontally lang
+    statusDiv.style.background = "rgba(40, 167, 69, 0.9)"; 
+    statusDiv.style.color = "white";
+    statusDiv.style.padding = "15px 30px";
+    statusDiv.style.borderRadius = "8px";
+    statusDiv.style.zIndex = "10000";
+    statusDiv.style.fontWeight = "bold";
+    statusDiv.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+    
+    document.body.appendChild(statusDiv);
+
+    // Mawawala pagkatapos ng 1.5 seconds
+    setTimeout(() => {
+        statusDiv.remove();
+    }, 1500);
 }
 
 function deleteRecord(id) { if (confirm("Delete this record?")) db.ref("facultyRecords/" + id).remove(); }
