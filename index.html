@@ -529,7 +529,7 @@ function addRecord(remark, className) {
 function addRecord(remark, className) {
     const name = document.getElementById("name").value;
     const datetime = document.getElementById("datetime").value;
-    const course = document.getElementById("section").value;
+    const section = document.getElementById("section").value;
     const room = document.getElementById("room").value;
     const startTime = document.getElementById("startTime").value;
     const endTime = document.getElementById("endTime").value;
@@ -539,16 +539,16 @@ function addRecord(remark, className) {
         return; 
     }
 
-    recordsRef.push({ 
-        name, 
-        datetime, 
-        course, 
-        room, 
-        startTime, 
-        endTime, 
-        remark, 
-        className 
-    })
+    recordsRef.push({
+    name,
+    datetime,
+    section,
+    room,
+    startTime,
+    endTime,
+    remark,
+    className
+});
     .then(() => {
         // Notification sa gitna
         showStatus("Record added successfully!");
