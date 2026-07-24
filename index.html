@@ -531,8 +531,9 @@ function addRecord(remark, className) {
     showStatus("Error: Hindi naisave.");
     console.error(error);
 });
+}
+// Function para sa notification
 
-// Function para sa notification na nasa gitna at kusa nawawala
 function showStatus(message) {
     const statusDiv = document.createElement("div");
     statusDiv.innerText = message;
@@ -681,7 +682,7 @@ function exportPDF() {
     doc.setTextColor(0, 0, 0); // Black title
     doc.text("Faculty Detailed Records", 14, 20);
 
-    const body = filteredRecords.map(r => [r.name, r.datetime, r.course, r.room, r.remark]);
+    const body = filteredRecords.map(r => [r.name, r.datetime, r.section, r.room, r.remark]);
 
     doc.autoTable({
         head: [['Name', 'Date', 'Section', 'Room', 'Remark']],
@@ -716,20 +717,19 @@ document.getElementById("searchBar").addEventListener("keyup", function() {
 });
 
 // --- LOGIN ENTER KEY LISTENER ---
-document.getElementById("password").addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        checkLogin();
-    }
-});
-
 document.getElementById("username").addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
         checkLogin();
     }
 });
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+document.getElementById("password").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        checkLogin();
+    }
+});
 </script>
 </body>
 </html>
