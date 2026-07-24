@@ -494,13 +494,12 @@ function toggleCourse() {
     m.style.display = (m.style.display === "block" ? "none" : "block"); 
 }
 
-function setSection(s) { 
-    document.getElementById("section").value = s; 
-    document.getElementById("sectionBtn").innerText = s; 
-    document.getElementById("courseMenu").style.display = "none"; 
+function setSection(s) {
+    document.getElementById("section").value = s;
+    document.getElementById("sectionBtn").innerText = s;
+    document.getElementById("courseMenu").style.display = "none";
 }
 
-// --- RECORD MANAGEMENT ---
 function addRecord(remark, className) {
     const name = document.getElementById("name").value;
     const datetime = document.getElementById("datetime").value;
@@ -509,16 +508,20 @@ function addRecord(remark, className) {
     const startTime = document.getElementById("startTime").value;
     const endTime = document.getElementById("endTime").value;
 
-    if (!name || !datetime) { alert("Please select Faculty and Date."); return; }
+    if (!name || !datetime) {
+        alert("Please select Faculty and Date.");
+        return;
+    }
 
-    recordsRef.push({ name, datetime, course, room, startTime, endTime, remark, className })
-    .then(() => {
-        // Papalitan ang alert() ng temporary status message
-        showStatus("Record added successfully!");
-    })
-    .catch((error) => {
-        showStatus("Error:Not saved.");
-        console.error(error);
+    recordsRef.push({
+        name,
+        datetime,
+        section,
+        room,
+        startTime,
+        endTime,
+        remark,
+        className
     });
 }
 
