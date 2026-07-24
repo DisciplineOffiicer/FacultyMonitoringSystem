@@ -428,7 +428,7 @@
         </div>
 
         <table>
-            <thead><tr><th>Name</th><th>Date & Time</th><th>Section</th><th>Room</th><th>Start</th><th>End</th><th>Remarks</th><th class="no-print">Action</th></tr></thead>
+            <thead><tr><th>Name</th><th>Date & Time</th><th>Course</th><th>Room</th><th>Start</th><th>End</th><th>Remarks</th><th class="no-print">Action</th></tr></thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
@@ -520,13 +520,13 @@ function addRecord(remark, className) {
 
     if (!name || !datetime) { alert("Please select Faculty and Date."); return; }
 
-    recordsRef.push({ name, datetime, section, room, startTime, endTime, remark, className })
+    recordsRef.push({ name, datetime, course, room, startTime, endTime, remark, className })
     .then(() => {
         // Papalitan ang alert() ng temporary status message
         showStatus("Record added successfully!");
     })
     .catch((error) => {
-        showStatus("Error: Hindi naisave.");
+        showStatus("Error:Not saved.");
         console.error(error);
     });
 }
@@ -535,7 +535,7 @@ function addRecord(remark, className) {
 function addRecord(remark, className) {
     const name = document.getElementById("name").value;
     const datetime = document.getElementById("datetime").value;
-    const section = document.getElementById("section").value;
+    const course = document.getElementById("section").value;
     const room = document.getElementById("room").value;
     const startTime = document.getElementById("startTime").value;
     const endTime = document.getElementById("endTime").value;
@@ -548,7 +548,7 @@ function addRecord(remark, className) {
     recordsRef.push({ 
         name, 
         datetime, 
-        section, 
+        course, 
         room, 
         startTime, 
         endTime, 
@@ -695,7 +695,7 @@ function exportSummaryPDF() {
 }
 
 function exportExcel() {
-    let csv = "Name,Date,Section,Room,Start,End,Remark\n";
+    let csv = "Name,Date,Course,Room,Start,End,Remark\n";
     filteredRecords.forEach(r => { 
         csv += `"${r.name}","${r.datetime}","${r.section}","${r.room}","${r.startTime}","${r.endTime}","${r.remark}"\n`; 
     });
@@ -711,9 +711,9 @@ function exportPDF() {
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text("Faculty Detailed Records", 14, 20);
-    const body = filteredRecords.map(r => [r.name, r.datetime, r.section, r.room, r.remark]);
+    const body = filteredRecords.map(r => [r.name, r.datetime, r.course, r.room, r.remark]);
     doc.autoTable({
-        head: [['Name', 'Date', 'Section', 'Room', 'Remark']],
+        head: [['Name', 'Date', 'Course', 'Room', 'Remark']],
         body: body,
         startY: 30,
         theme: 'grid',
@@ -729,7 +729,7 @@ function exportPDF() {
     doc.setTextColor(0, 0, 0); // Black title
     doc.text("Faculty Detailed Records", 14, 20);
 
-    const body = filteredRecords.map(r => [r.name, r.datetime, r.section, r.room, r.remark]);
+    const body = filteredRecords.map(r => [r.name, r.datetime, r.course, r.room, r.remark]);
 
     doc.autoTable({
         head: [['Name', 'Date', 'Section', 'Room', 'Remark']],
