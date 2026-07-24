@@ -109,12 +109,22 @@
         }
         .course:hover { background: #f0f0f0; }
 
-        .section-menu {
-    display: none !important;
+       .section-menu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: white;
+    border: 1px solid #ccc;
+    min-width: 260px;
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 6000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .course:hover > .section-menu {
-    display: none !important;
+    display: block;
 }
 
         .section { 
