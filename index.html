@@ -116,7 +116,6 @@
 .course:hover > .section-menu {
     display: none !important;
 }
-        }
 
         .section { 
             padding: 8px 12px; 
@@ -500,30 +499,6 @@ function setSection(s) {
     document.getElementById("courseMenu").style.display = "none";
 }
 
-function addRecord(remark, className) {
-    const name = document.getElementById("name").value;
-    const datetime = document.getElementById("datetime").value;
-    const section = document.getElementById("section").value;
-    const room = document.getElementById("room").value;
-    const startTime = document.getElementById("startTime").value;
-    const endTime = document.getElementById("endTime").value;
-
-    if (!name || !datetime) {
-        alert("Please select Faculty and Date.");
-        return;
-    }
-
-    recordsRef.push({
-        name,
-        datetime,
-        section,
-        room,
-        startTime,
-        endTime,
-        remark,
-        className
-    });
-}
 
 // Magdagdag ng function para sa auto-hide na message
 function addRecord(remark, className) {
