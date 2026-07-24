@@ -676,21 +676,6 @@ function exportExcel() {
 function exportPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("Faculty Detailed Records", 14, 20);
-    const body = filteredRecords.map(r => [r.name, r.datetime, r.course, r.room, r.remark]);
-    doc.autoTable({
-        head: [['Name', 'Date', 'Course', 'Room', 'Remark']],
-        body: body,
-        startY: 30,
-        theme: 'grid',
-        headStyles: { fillColor: [10, 42, 102] }
-    });
-    doc.save("Detailed_Records.pdf");
-}
-function exportPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
     
     doc.setFontSize(16);
     doc.setTextColor(0, 0, 0); // Black title
@@ -744,6 +729,7 @@ document.getElementById("username").addEventListener("keypress", function(event)
         checkLogin();
     }
 });
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </script>
 </body>
 </html>
