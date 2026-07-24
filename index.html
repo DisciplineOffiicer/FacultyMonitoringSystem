@@ -523,16 +523,14 @@ function addRecord(remark, className) {
     endTime,
     remark,
     className
+})
+.then(() => {
+    showStatus("Record added successfully!");
+})
+.catch((error) => {
+    showStatus("Error: Hindi naisave.");
+    console.error(error);
 });
-    .then(() => {
-        // Notification sa gitna
-        showStatus("Record added successfully!");
-    })
-    .catch((error) => {
-        showStatus("Error: Hindi naisave.");
-        console.error(error);
-    });
-}
 
 // Function para sa notification na nasa gitna at kusa nawawala
 function showStatus(message) {
